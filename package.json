@@ -1,0 +1,21 @@
+{
+  "name": "loket-mandatarissen-producer",
+  "version": "0.0.0",
+  "description": "Microservice to produce delta files containing data about mandatees",
+  "dependencies": {
+    "@lblod/mu-auth-sudo": "^0.2.0",
+    "fs-extra": "^8.0.1",
+    "lodash.flatten": "^4.4.0",
+    "lodash.uniq": "^4.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lblod/loket-mandatarissen-producer.git"
+  },
+  "author": "redpencil.io",
+  "license": "MIT"
+}
