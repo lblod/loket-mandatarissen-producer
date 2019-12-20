@@ -1,29 +1,36 @@
-import { app, errorHandler, uuid, sparqlEscapeDateTime } from 'mu';
-import { querySudo as query, updateSudo as update } from '@lblod/mu-auth-sudo';
+import { app, errorHandler } from 'mu';
 import bodyParser from 'body-parser';
 import DeltaCache from './delta-cache';
+import { produceMandateesDelta } from './producer';
 
 app.use( bodyParser.json( { type: function(req) { return /^application\/json/.test( req.get('content-type') ); } } ) );
+
+const LOG_INCOMING_DELTA = process.env.LOG_INCOMING_DELTA || true;
+const LOG_OUTGOING_DELTA = process.env.LOG_OUTGOING_DELTA || true;
 
 const DELTA_INTERVAL = process.env.DELTA_INTERVAL_MS || 1000;
 
 const cache = new DeltaCache();
 let hasTimeout = null;
 
-app.post('/delta', function( req, res ) {
+app.post('/delta', async function( req, res ) {
   const body = req.body;
 
-  console.log(`Pushing onto cache ${JSON.stringify(body)}`);
+  if (LOG_INCOMING_DELTA)
+    console.log(`Receiving delta ${JSON.stringify(body)}`);
 
-  // TODO verification which data to push to the cache
+  const delta = await produceMandateesDelta(body);
 
-  cache.push( ...body );
+  if (LOG_OUTGOING_DELTA)
+    console.log(`Pushing onto cache ${JSON.stringify(delta)}`);
+
+  cache.push( ...delta );
 
   if( !hasTimeout ){
     triggerTimeout();
   }
 
-  res.status(200).send("Processed");
+  res.status(200).send({ status: "done" });
 } );
 
 app.get('/files', async function( req, res ) {
@@ -33,10 +40,11 @@ app.get('/files', async function( req, res ) {
 } );
 
 function triggerTimeout(){
-  hasTimeout = false;  // TODO move into setTimeout once infinte loop is resolved
   setTimeout( () => {
+    hasTimeout = false;
     cache.generateDeltaFile();
   }, DELTA_INTERVAL );
   hasTimeout = true;
 }
 
+app.use(errorHandler);

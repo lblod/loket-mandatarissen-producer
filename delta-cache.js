@@ -3,6 +3,7 @@ import { querySudo as query, updateSudo as update } from '@lblod/mu-auth-sudo';
 import fs from 'fs-extra';
 
 const shareFolder = '/share';
+const relativeFilePath = 'deltas/mandatarissen';  // relative path of the delta files compared to the root folder of the file service that will host the files
 
 export default class DeltaCache {
 
@@ -24,19 +25,23 @@ export default class DeltaCache {
    *
    * @public
   */
-  async generateDeltaFile(){
-    const cachedArray = this.cache;
-    this.cache = [];
+  async generateDeltaFile() {
+    if (this.cache.length) {
+      const cachedArray = this.cache;
+      this.cache = [];
 
-    try {
-      const filename = `delta-${new Date().toISOString()}.json`;
-      const filepath = `/${shareFolder}/${filename}`;
-      await fs.writeFile(filepath, JSON.stringify( cachedArray ));
-      console.log("The file was saved on disk!");
-      await this.writeFileToStore(filename, filepath);
-      console.log("The file was saved in the store!");
-    } catch (e) {
-      console.log(e);
+      try {
+        const filename = `delta-${new Date().toISOString()}.json`;
+        const filepath = `/${shareFolder}/${filename}`;
+        await fs.writeFile(filepath, JSON.stringify( cachedArray ));
+        console.log("The file was saved on disk!");
+        await this.writeFileToStore(filename, filepath);
+        console.log("The file was saved in the store!");
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      console.log("Empty cache. Nothing to save on disk");
     }
   }
 
@@ -87,7 +92,7 @@ export default class DeltaCache {
     const virtualFileUri = `http://mu.semte.ch/services/poc-diff-producer-service/files/${virtualFileUuid}`;
     const nowLiteral = sparqlEscapeDateTime(new Date());
     const physicalFileUuid = uuid();
-    const physicalFileUri = `share://${filename}`;
+    const physicalFileUri = `share://${relativeFilePath}/${filename}`;
 
     await update(`
     PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
