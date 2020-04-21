@@ -3,12 +3,13 @@ import bodyParser from 'body-parser';
 import DeltaCache from './delta-cache';
 import { produceMandateesDelta } from './producer';
 
+import {
+  LOG_INCOMING_DELTA,
+  LOG_OUTGOING_DELTA,
+  DELTA_INTERVAL
+} from './env-config';
+
 app.use( bodyParser.json( { type: function(req) { return /^application\/json/.test( req.get('content-type') ); } } ) );
-
-const LOG_INCOMING_DELTA = process.env.LOG_INCOMING_DELTA || true;
-const LOG_OUTGOING_DELTA = process.env.LOG_OUTGOING_DELTA || true;
-
-const DELTA_INTERVAL = process.env.DELTA_INTERVAL_MS || 1000;
 
 const cache = new DeltaCache();
 let hasTimeout = null;
