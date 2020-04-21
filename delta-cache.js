@@ -2,8 +2,8 @@ import { uuid, sparqlEscapeDateTime } from 'mu';
 import { querySudo as query, updateSudo as update } from '@lblod/mu-auth-sudo';
 import fs from 'fs-extra';
 
-const shareFolder = '/share';
-const relativeFilePath = 'deltas/mandatarissen';  // relative path of the delta files compared to the root folder of the file service that will host the files
+const SHARE_FOLDER = '/share';
+const RELATIVE_FILE_PATH = 'deltas/mandatarissen';  // relative path of the delta files compared to the root folder of the file service that will host the files
 
 export default class DeltaCache {
 
@@ -32,11 +32,11 @@ export default class DeltaCache {
 
       try {
         const filename = `delta-${new Date().toISOString()}.json`;
-        const filepath = `/${shareFolder}/${filename}`;
+        const filepath = `/${SHARE_FOLDER}/${RELATIVE_FILE_PATH}/${filename}`;
         await fs.writeFile(filepath, JSON.stringify( cachedArray ));
-        console.log("The file was saved on disk!");
+        console.log(`Delta cache has been written to file. Cache contained ${cachedArray.length} items.`);
         await this.writeFileToStore(filename, filepath);
-        console.log("The file was saved in the store!");
+        console.log("File is persisted in store and can be consumed now.");
       } catch (e) {
         console.log(e);
       }
@@ -89,10 +89,10 @@ export default class DeltaCache {
   */
   async writeFileToStore(filename, filepath) {
     const virtualFileUuid = uuid();
-    const virtualFileUri = `http://mu.semte.ch/services/poc-diff-producer-service/files/${virtualFileUuid}`;
+    const virtualFileUri = `http://data.lblod.info/files/${virtualFileUuid}`;
     const nowLiteral = sparqlEscapeDateTime(new Date());
     const physicalFileUuid = uuid();
-    const physicalFileUri = `share://${relativeFilePath}/${filename}`;
+    const physicalFileUri = `share://${RELATIVE_FILE_PATH}/${filename}`;
 
     await update(`
     PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
