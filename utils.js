@@ -10,7 +10,7 @@ function normalizePredicate(predicate) {
   return isInverse(predicate) ? predicate.slice(1) : predicate;
 }
 
-export default {
+export {
   isInverse,
   sparqlEscapePredicate,
   normalizePredicate
