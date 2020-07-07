@@ -20,18 +20,21 @@ app.post('/delta', async function( req, res ) {
   if (LOG_INCOMING_DELTA)
     console.log(`Receiving delta ${JSON.stringify(body)}`);
 
-  const delta = await produceMandateesDelta(body);
+  const processDelta = async function() {
+    const delta = await produceMandateesDelta(body);
 
-  if (LOG_OUTGOING_DELTA)
-    console.log(`Pushing onto cache ${JSON.stringify(delta)}`);
+    if (LOG_OUTGOING_DELTA)
+      console.log(`Pushing onto cache ${JSON.stringify(delta)}`);
 
-  cache.push( ...delta );
+    cache.push( ...delta );
 
-  if( !hasTimeout ){
-    triggerTimeout();
-  }
+    if( !hasTimeout ){
+      triggerTimeout();
+    }
+  };
+  processDelta();  // execute async
 
-  res.status(200).send({ status: "done" });
+  res.status(202).send();
 } );
 
 app.get('/files', async function( req, res ) {
