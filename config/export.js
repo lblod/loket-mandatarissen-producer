@@ -34,8 +34,6 @@ const config = {
         "http://mu.semte.ch/vocabularies/core/uuid",
         "http://www.w3.org/2004/02/skos/core#prefLabel",
         "http://www.w3.org/2004/02/skos/core#scopeNote"
-      ],
-      relations: [
       ]
     },
     {
@@ -54,8 +52,6 @@ const config = {
         "http://mu.semte.ch/vocabularies/core/uuid",
         "http://www.w3.org/2004/02/skos/core#prefLabel",
         "http://www.w3.org/2004/02/skos/core#scopeNote"
-      ],
-      relations: [
       ]
     },
     {
@@ -72,9 +68,7 @@ const config = {
         "http://mu.semte.ch/vocabularies/core/uuid",
         "http://data.vlaanderen.be/ns/mandaat#start",
         "http://data.vlaanderen.be/ns/mandaat#einde",
-        "http://data.vlaanderen.be/ns/mandaat#rangorde"
-      ],
-      relations: [
+        "http://data.vlaanderen.be/ns/mandaat#rangorde",
         "http://data.vlaanderen.be/ns/mandaat#isBestuurlijkeAliasVan",
         "http://www.w3.org/ns/org#holds",
         "http://data.vlaanderen.be/ns/mandaat#status",
@@ -99,9 +93,7 @@ const config = {
         "http://xmlns.com/foaf/0.1/familyName",
         "http://xmlns.com/foaf/0.1/name",
         "http://data.vlaanderen.be/ns/persoon#gebruikteVoornaam",
-        "http://www.w3.org/2002/07/owl#sameAs"
-      ],
-      relations: [
+        "http://www.w3.org/2002/07/owl#sameAs",
         "http://data.vlaanderen.be/ns/persoon#heeftGeboorte",
         "http://data.vlaanderen.be/ns/persoon#geslacht"
       ]
@@ -122,8 +114,6 @@ const config = {
         "http://mu.semte.ch/vocabularies/core/uuid",
         "http://data.vlaanderen.be/ns/persoon#datum",
         "http://www.w3.org/2002/07/owl#sameAs"
-      ],
-      relations: [
       ]
     },
     {
@@ -138,9 +128,7 @@ const config = {
         "http://www.w3.org/2004/02/skos/core#inScheme"
       ],
       properties: [
-        "http://mu.semte.ch/vocabularies/core/uuid"
-      ],
-      relations: [
+        "http://mu.semte.ch/vocabularies/core/uuid",
         "http://www.w3.org/ns/org#organisation"
       ]
     },
@@ -158,9 +146,7 @@ const config = {
       ],
       properties: [
         "http://mu.semte.ch/vocabularies/core/uuid",
-        "http://www.w3.org/ns/regorg#legalName"
-      ],
-      relations: [
+        "http://www.w3.org/ns/regorg#legalName",
         "http://www.w3.org/ns/org#memberOf",
         "http://www.w3.org/ns/org#linkedTo"
       ]
@@ -176,9 +162,7 @@ const config = {
       ],
       properties: [
         "http://mu.semte.ch/vocabularies/core/uuid",
-        "http://data.vlaanderen.be/ns/mandaat#aantalHouders"
-      ],
-      relations: [
+        "http://data.vlaanderen.be/ns/mandaat#aantalHouders",
         "http://www.w3.org/ns/org#role"
       ]
     },
@@ -197,8 +181,6 @@ const config = {
         "http://mu.semte.ch/vocabularies/core/uuid",
         "http://www.w3.org/2004/02/skos/core#prefLabel",
         "http://www.w3.org/2004/02/skos/core#scopeNote"
-      ],
-      relations: [
       ]
     },
     { // bestuursorgaan in tijd
@@ -212,9 +194,7 @@ const config = {
       properties: [
         "http://mu.semte.ch/vocabularies/core/uuid",
         "http://data.vlaanderen.be/ns/mandaat#bindingEinde",
-        "http://data.vlaanderen.be/ns/mandaat#bindingStart"
-      ],
-      relations: [
+        "http://data.vlaanderen.be/ns/mandaat#bindingStart",
         "http://www.w3.org/ns/org#hasPost",
         "http://data.vlaanderen.be/ns/mandaat#isTijdspecialisatieVan"
       ]
@@ -228,9 +208,7 @@ const config = {
       ],
       properties: [
         "http://mu.semte.ch/vocabularies/core/uuid",
-        "http://www.w3.org/2004/02/skos/core#prefLabel"
-      ],
-      relations: [
+        "http://www.w3.org/2004/02/skos/core#prefLabel",
         "http://data.vlaanderen.be/ns/besluit#bestuurt",
         "http://data.vlaanderen.be/ns/besluit#classificatie"
       ]
@@ -248,8 +226,6 @@ const config = {
         "http://mu.semte.ch/vocabularies/core/uuid",
         "http://www.w3.org/2004/02/skos/core#prefLabel",
         "http://www.w3.org/2004/02/skos/core#scopeNote"
-      ],
-      relations: [
       ]
     },
     {
@@ -261,9 +237,7 @@ const config = {
       properties: [
         "http://mu.semte.ch/vocabularies/core/uuid",
         "http://www.w3.org/2004/02/skos/core#prefLabel",
-        "http://www.w3.org/2004/02/skos/core#altLabel"
-      ],
-      relations: [
+        "http://www.w3.org/2004/02/skos/core#altLabel",
         "http://data.vlaanderen.be/ns/besluit#classificatie",
         "http://data.vlaanderen.be/ns/besluit#werkingsgebied"
       ]
@@ -278,8 +252,6 @@ const config = {
         "http://mu.semte.ch/vocabularies/core/uuid",
         "http://www.w3.org/2004/02/skos/core#prefLabel",
         "http://www.w3.org/2004/02/skos/core#scopeNote"
-      ],
-      relations: [
       ]
     },
     {
@@ -293,8 +265,6 @@ const config = {
         "http://mu.semte.ch/vocabularies/core/uuid",
         "http://www.w3.org/2000/01/rdf-schema#label",
         "http://mu.semte.ch/vocabularies/ext/werkingsgebiedNiveau"
-      ],
-      relations: [
       ]
     }
   ]

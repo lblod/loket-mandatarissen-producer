@@ -35,13 +35,13 @@ app.post('/delta', async function( req, res ) {
   processDelta();  // execute async
 
   res.status(202).send();
-} );
+});
 
 app.get('/files', async function( req, res ) {
   const since = req.query.since || new Date().toISOString();
   const files = await cache.getDeltaFiles(since);
   res.json({ data: files });
-} );
+});
 
 function triggerTimeout(){
   setTimeout( () => {
