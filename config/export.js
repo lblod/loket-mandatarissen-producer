@@ -146,7 +146,7 @@ const config = {
       ],
       properties: [
         "http://mu.semte.ch/vocabularies/core/uuid",
-        "http://www.w3.org/ns/regorg#legalName",
+        "https://www.w3.org/ns/regorg#legalName",
         "http://www.w3.org/ns/org#memberOf",
         "http://www.w3.org/ns/org#linkedTo"
       ]
