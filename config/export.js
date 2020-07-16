@@ -1,21 +1,4 @@
 const config = {
-  prefixes: {
-    mandaat: "http://data.vlaanderen.be/ns/mandaat#",
-    besluit: "http://data.vlaanderen.be/ns/besluit#",
-    persoon: "http://data.vlaanderen.be/ns/persoon#",
-    foaf: "http://xmlns.com/foaf/0.1/",
-    org: "http://www.w3.org/ns/org#",
-    skos: "http://www.w3.org/2004/02/skos/core#",
-    rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-    ext: "http://mu.semte.ch/vocabularies/ext/",
-    regorg: "https://www.w3.org/ns/regorg#",
-    person: "http://www.w3.org/ns/person#",
-    schema: "http://schema.org/",
-    prov: "http://www.w3.org/ns/prov#",
-    adms: "http://www.w3.org/ns/adms#",
-    mu: "http://mu.semte.ch/vocabularies/core/",
-    owl: "http://www.w3.org/2002/07/owl#"
-  },
   conceptScheme: "http://lblod.data.gift/concept-schemes/0887b850-b810-40d4-be0f-cafd01d3259b",
   export: [
     {
