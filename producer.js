@@ -9,6 +9,9 @@ import {
   LOG_DELTA_REWRITE
 } from './env-config';
 
+// TODO add support for a prefix map in the export configuration
+//      preprocess the imported config by resolving all prefixed URIs with full URIs
+
 /**
  * Rewriting the incoming delta message to a delta message relevant for the mandatee export
 */
@@ -33,6 +36,8 @@ async function produceMandateesDelta(delta) {
     if (updatedChangeSet.inserts.length || updatedChangeSet.deletes.length)
       updatedDeltas.push(updatedChangeSet);
   }
+
+  // TODO optimization: remove sequential changesets that insert/delete exactly the same triples (or vice versa)
 
   return updatedDeltas;
 }

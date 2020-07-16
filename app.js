@@ -52,3 +52,5 @@ function triggerTimeout(){
 }
 
 app.use(errorHandler);
+
+// TODO write the in-memory delta cache to a file before shutting down the service
