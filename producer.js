@@ -9,10 +9,12 @@ import {
   LOG_DELTA_REWRITE
 } from './env-config';
 
+/**
+ * Rewriting the incoming delta message to a delta message relevant for the mandatee export
+*/
 async function produceMandateesDelta(delta) {
   const updatedDeltas = [];
 
-  // Rewriting the incoming delta message to a delta message relevant for the mandatee export
   for (let changeSet of delta) {
     const updatedChangeSet = { inserts: [], deletes: [] };
 
@@ -36,10 +38,20 @@ async function produceMandateesDelta(delta) {
 }
 
 /**
- * TODO: document
+ * Build a mapping of URIs to their export config for each subject/object URI in a changeset
+ * based on the rdf:type of the URI. The mapping will be used as an in-memory cache.
+ * There may be multiple entries in the mapping for a specific URI. Either, the URI has
+ * multiple rdf:type or there are multiple export configurations for one rdf:type.
+ *
  * For deletions it's important to note that the deleted data is not available anymore
- * in the store since the data has been deleted. That's why the typeCache is built based
- * on information from the triple store as well as on information from the delta changeset.
+ * in the store since the data has been deleted. That's why the rdf:type for a URI is retrieved
+ * from the triple store as well as from the delta changeset.
+ *
+ * Building the cache is purely based on rdf:type and does not take the path from
+ * a resource to the export concept scheme into account.
+ *
+ * @param object changeSet Delta changeset including `inserts` and `deletes`
+ * @return Array Array of objects like { uri, config }
 */
 async function buildTypeCache(changeSet) {
   const cache = [];
@@ -76,7 +88,7 @@ async function buildTypeCache(changeSet) {
 }
 
 /**
- * Get triples to insert for a given delta insert changeset
+ * Rewrite the received triples to insert to an insert changeset relevant for the export of mandatees.
  *
  * Insertion of 1 triple may lead to a bunch of resources to be exported,
  * because the newly inserted triple completes the path to the export concept scheme.
@@ -84,9 +96,10 @@ async function buildTypeCache(changeSet) {
  * E.g. Linking a mandatee to a mandate may cause the export of the mandate, but as well
  *      the export of the person, the person's birthdate etc.
  *
- * High-level the function first walks over the received insert changeset
- * and checks for each triples whether it should be exported based on the subject's type
- * and the export configuration.
+ * High-level description of the function:
+ * The function first walks over the received insert changeset
+ * and checks for each triple whether it should be exported based
+ * on the subject's type and the export configuration.
  * Next, for each inserted relation triple (ie. object is a URI, not a literal)
  * it checks whether the subject/object needs to be added as an additional resource
  * based on the predicate and the export configuration.
@@ -109,7 +122,7 @@ async function rewriteInsertedChangeset(changeSet, typeCache) {
           if (LOG_DELTA_REWRITE)
             console.log(`Triple ${serializeTriple(triple)} copied to insert changeset for export.`);
           triplesToInsert.push(triple);
-          break; // no need to check the remaining export configurations since triple is already copied
+          break; // no need to check the remaining export configurations since triple is already copied to the resulting changeset
         } else if (LOG_DELTA_REWRITE) {
           if (!isInScope)
             console.log(`No path to export concept scheme found for subject <${subject}>.`);
@@ -136,10 +149,15 @@ async function rewriteInsertedChangeset(changeSet, typeCache) {
 }
 
 /**
- * Enrich insert changeset with resources that are now in scope of the export
- * by addition of a triple
+ * Enrich the insert changeset with resources that become
+ * relevant for the export based on the triples in the original insert changeset.
+ * Ie. 'deeper' resources that now also have a complete path to the export concept scheme.
+ * Eg. insertion of a mandatee may cause the insertion of the person resource as well.
  *
- * TODO: add inline documentation here
+ * The function is recursively applied to insert new related resources for the resources
+ * that have just been added.
+ * Eg. addition of the person in the previous example may cause the insertion
+ * of the person's birthdate as well.
 */
 async function enrichInsertedChangeset(changeSet, typeCache, processedResources) {
   const impactedResources = getImpactedResources(changeSet, typeCache);
@@ -175,15 +193,15 @@ async function enrichInsertedChangeset(changeSet, typeCache, processedResources)
 
 
 /**
- * Get triples to delete for a given delta delete changeset
+ * Rewrite the received triples to delete to a delete changeset relevant for the export of mandatees.
  *
  * Deletion of 1 triple may lead to a bunch of resources to be deleted,
- * because they are no longer in scope of the export.
+ * because the deleted triple breaks the path to the export concept scheme.
  *
  * E.g. Deletion of a mandatee may cause the deletion of the person as well,
  *       unless the person is still related to another mandatee.
  *
- * Additional deletions are computed based only on the data that is still
+ * Note: additional triples to delete are computed only based on the data that is still
  * in the store. Other triples that need to be deleted, that are not in the store anymore,
  * will arrive in (different) delta changesets.
 */
@@ -206,7 +224,7 @@ async function rewriteDeletedChangeset(changeSet, typeCache) {
           if (LOG_DELTA_REWRITE)
             console.log(`Triple ${serializeTriple(triple)} copied to delete changeset for export.`);
           triplesToDelete.push(triple);
-          break; // no need to check the remaining export configurations since triple is already copied
+          break; // no need to check the remaining export configurations since triple is already copied to the resulting changeset
         } else if (LOG_DELTA_REWRITE) {
           console.log(`Predicate <${predicate}> not configured for export for type <${config.type}>.`);
         }
@@ -230,10 +248,15 @@ async function rewriteDeletedChangeset(changeSet, typeCache) {
 }
 
 /**
- * Enrich delete changeset with resources that are now out scope of the export
- * by removal of a triple
+ * Enrich the delete changeset with resources that become irrelevant for the export
+ * based on the triples in the original delete changeset.
+ * Ie. 'deeper' resources that now don't have a complete path to the export concept scheme anymore.
+ * Eg. deletion of a mandatee may cause the deletion of the person resource as well.
  *
- * TODO: add inline documentation here
+ * The function is recursively applied to delete additional related resources
+ * for the resources that have just been added to the delete changeset.
+ * Eg. deletion of the person in the previous example may cause the deletion
+ * of the person's birthdate as well.
 */
 async function enrichDeletedChangeset(changeSet, typeCache, processedResources) {
   const impactedResources = getImpactedResources(changeSet, typeCache);
@@ -266,7 +289,17 @@ async function enrichDeletedChangeset(changeSet, typeCache, processedResources) 
 }
 
 /**
- * TODO add documentation
+ * Get all possibly impacted resources by a changeset of triples. Impacted resources are subject/objects
+ * of the triples in the changeSet for which a relation (predicate) has been inserted/deleted, that may
+ * cause the resource to be included/excluded from the export.
+ *
+ * This function is the most complex part of the delta rewriting. The reasoning, which is explained in
+ * inline documentation, can be best understood by creating a diagram of all configured types to export
+ * and their path to the export concept scheme.
+ *
+ * Note: this function returns any possibly impacted resources. Whether the resource is
+ * (ir)relevant for the export (ie. it has/doesn't have a path to the export concept scheme)
+ * is validated in the enrichInserted/DeletedChangeset functions.
 */
 function getImpactedResources(changeSet, typeCache) {
   const resources = [];
@@ -276,7 +309,7 @@ function getImpactedResources(changeSet, typeCache) {
     console.log(`Found ${relations.length} triples in the changeset that are relations to other resources. They may possibly impact the export.`);
 
   for (let triple of relations) {
-    // Add all subjects of triples with a predicate that equals the last path segment
+    // Add all subjects of triples with a predicate that equals the last (deepest) path segment
     // to the export CS in the export configuration of the subject's type
     // E.g. on insertion of the triple <mandatee-x> org:holds <mandate-a>
     // the full mandatee-x resource needs to be inserted (similar for delete)
@@ -322,7 +355,7 @@ function getImpactedResources(changeSet, typeCache) {
 
 /**
  * Construct the triples to be exported (inserted/deleted) for a given subject URI
- *  based on the export configuration and the triples in the triplestore
+ * based on the export configuration and the triples in the triplestore
 */
 async function exportResource(uri, config) {
   const delta = [];
