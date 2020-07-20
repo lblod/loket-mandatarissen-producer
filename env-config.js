@@ -1,7 +1,7 @@
-const LOG_INCOMING_DELTA = process.env.LOG_INCOMING_DELTA || true;
-const LOG_OUTGOING_DELTA = process.env.LOG_OUTGOING_DELTA || true;
+const LOG_INCOMING_DELTA = process.env.LOG_INCOMING_DELTA || false;
+const LOG_OUTGOING_DELTA = process.env.LOG_OUTGOING_DELTA || false;
 const DELTA_INTERVAL = process.env.DELTA_INTERVAL_MS || 1000;
-const LOG_DELTA_REWRITE = process.env.LOG_DELTA_REWRITE || true;
+const LOG_DELTA_REWRITE = process.env.LOG_DELTA_REWRITE || false;
 
 export {
   LOG_INCOMING_DELTA,
