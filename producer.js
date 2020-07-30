@@ -1,13 +1,12 @@
 import { uuid, sparqlEscapeUri } from 'mu';
 import { querySudo as query, updateSudo as update } from '@lblod/mu-auth-sudo';
 import uniq from 'lodash.uniq';
-import flatten from 'lodash.flatten';
-import exportConfig from './config/export';
 import { isInverse, sparqlEscapePredicate, normalizePredicate, serializeTriple, isSamePath } from './utils';
 import {
   LOG_INCOMING_DELTA_TYPES,
   LOG_DELTA_REWRITE
 } from './env-config';
+const EXPORT_CONFIG = require('/config/export.json');
 
 // TODO add support for a prefix map in the export configuration
 //      preprocess the imported config by resolving all prefixed URIs with full URIs
@@ -77,7 +76,7 @@ async function buildTypeCache(changeSet) {
       console.log(`Found ${types.length} distinct types for URI <${uri}>.`);
 
     for (let type of types) {
-      const typeConfigs = exportConfig.export.filter(t => t.type == type);
+      const typeConfigs = EXPORT_CONFIG.export.filter(t => t.type == type);
       if (typeConfigs.length) {
         if (LOG_DELTA_REWRITE)
           console.log(`rdf:type <${type}> configured for export.`);
@@ -401,7 +400,7 @@ async function exportResource(uri, config) {
  * Ie. all configurations with a path that is 1 segment deeper than the given configuration.
 */
 function getChildConfigurations(config) {
-  return exportConfig.export.filter(child => {
+  return EXPORT_CONFIG.export.filter(child => {
     return child.pathToConceptScheme.length == config.pathToConceptScheme.length + 1
       && isSamePath(child.pathToConceptScheme.slice(1), config.pathToConceptScheme);
   });
@@ -414,7 +413,7 @@ async function hasPathToExportConceptScheme(subject, config) {
   const predicatePath = config.pathToConceptScheme.map(p => sparqlEscapePredicate(p)).join('/');
   const result = await query(`
     SELECT ?p WHERE {
-      ${sparqlEscapeUri(subject)} ${predicatePath} ${sparqlEscapeUri(exportConfig.conceptScheme)} ; ?p ?o .
+      ${sparqlEscapeUri(subject)} ${predicatePath} ${sparqlEscapeUri(EXPORT_CONFIG.conceptScheme)} ; ?p ?o .
     } LIMIT 1
   `);
   return result.results.bindings.length;
