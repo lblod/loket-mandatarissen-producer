@@ -1,9 +1,9 @@
 import { uuid, sparqlEscapeDateTime } from 'mu';
 import { querySudo as query, updateSudo as update } from '@lblod/mu-auth-sudo';
 import fs from 'fs-extra';
+import { RELATIVE_FILE_PATH } from './env-config';
 
 const SHARE_FOLDER = '/share';
-const RELATIVE_FILE_PATH = 'deltas/mandatarissen';  // relative path of the delta files compared to the root folder of the file service that will host the files
 
 export default class DeltaCache {
 
