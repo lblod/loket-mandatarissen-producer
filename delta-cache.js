@@ -1,7 +1,7 @@
 import { uuid, sparqlEscapeDateTime } from 'mu';
 import { querySudo as query, updateSudo as update } from '@lblod/mu-auth-sudo';
 import fs from 'fs-extra';
-import { RELATIVE_FILE_PATH } from './env-config';
+import { PUBLISHER_URI, RELATIVE_FILE_PATH } from './env-config';
 
 const SHARE_FOLDER = '/share';
 
@@ -64,7 +64,7 @@ export default class DeltaCache {
       ?s a nfo:FileDataObject ;
           mu:uuid ?uuid ;
           nfo:fileName ?filename ;
-          dct:publisher <http://data.lblod.info/services/loket-mandatarissen-producer> ;
+          dct:publisher <${PUBLISHER_URI}> ;
           dct:created ?created .
       ?file nie:dataSource ?s .
 
@@ -103,14 +103,14 @@ export default class DeltaCache {
 
     INSERT DATA {
       GRAPH <http://mu.semte.ch/graphs/public> {
-        <${virtualFileUri}> a nfo:FileDataObject ;
+        <${virtualFileUri}> a nfo:FileDamandatarissentaObject ;
           mu:uuid "${virtualFileUuid}" ;
           nfo:fileName "${filename}" ;
           dct:format "application/json" ;
           dbpedia:fileExtension "json" ;
           dct:created ${nowLiteral} ;
           dct:modified ${nowLiteral} ;
-          dct:publisher <http://data.lblod.info/services/loket-mandatarissen-producer> .
+          dct:publisher <${PUBLISHER_URI}> .
         <${physicalFileUri}> a nfo:FileDataObject ;
           mu:uuid "${physicalFileUuid}" ;
           nie:dataSource <${virtualFileUri}> ;
