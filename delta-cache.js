@@ -103,7 +103,7 @@ export default class DeltaCache {
 
     INSERT DATA {
       GRAPH <http://mu.semte.ch/graphs/public> {
-        <${virtualFileUri}> a nfo:FileDamandatarissentaObject ;
+        <${virtualFileUri}> a nfo:FileDataObject ;
           mu:uuid "${virtualFileUuid}" ;
           nfo:fileName "${filename}" ;
           dct:format "application/json" ;
