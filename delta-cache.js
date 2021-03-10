@@ -76,10 +76,7 @@ export default class DeltaCache {
     console.log(`Retrieving delta files since ${since}`);
 
     const result = await query(`
-    PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
-    PREFIX nfo: <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>
-    PREFIX nie: <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>
-    PREFIX dct: <http://purl.org/dc/terms/>
+    ${PREFIXES}
 
     SELECT ?uuid ?filename ?created WHERE {
       ?s a nfo:FileDataObject ;
@@ -182,11 +179,7 @@ export default class DeltaCache {
     const physicalFileUri = `share://${RELATIVE_FILE_PATH}/${filename}`;
 
     await update(`
-    PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
-    PREFIX nfo: <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>
-    PREFIX nie: <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>
-    PREFIX dbpedia: <http://dbpedia.org/resource/>
-    PREFIX dct: <http://purl.org/dc/terms/>
+    ${PREFIXES}
 
     INSERT DATA {
       GRAPH <http://mu.semte.ch/graphs/public> {
@@ -211,4 +204,3 @@ export default class DeltaCache {
   `);
   }
 }
-
