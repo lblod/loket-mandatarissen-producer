@@ -1,11 +1,8 @@
 import { uuid, sparqlEscapeUri } from 'mu';
 import { querySudo as query, updateSudo as update } from '@lblod/mu-auth-sudo';
-import uniq from 'lodash.uniq';
+import { uniq } from 'lodash';
 import { isInverse, sparqlEscapePredicate, normalizePredicate, serializeTriple, isSamePath } from './utils';
-import {
-  LOG_INCOMING_DELTA_TYPES,
-  LOG_DELTA_REWRITE
-} from './env-config';
+import { LOG_DELTA_REWRITE } from './env-config';
 const EXPORT_CONFIG = require('/config/export.json');
 
 // TODO add support for a prefix map in the export configuration
