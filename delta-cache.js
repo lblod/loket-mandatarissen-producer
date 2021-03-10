@@ -1,7 +1,19 @@
-import { uuid, sparqlEscapeDateTime } from 'mu';
+import { uuid, sparqlEscapeDateTime, sparqlEscapeUri } from 'mu';
 import { querySudo as query, updateSudo as update } from '@lblod/mu-auth-sudo';
 import fs from 'fs-extra';
-import { PUBLISHER_URI, RELATIVE_FILE_PATH } from './env-config';
+import { PUBLISHER_URI,
+         RELATIVE_FILE_PATH,
+         HEALING_JOB_OPERATION,
+         HEALING_TASK_DIFFFING_OPERATION,
+         STATUS_FAILED,
+         STATUS_SUCCESS,
+         TASK_TYPE,
+         PREFIXES,
+         JOB_TYPE,
+         CACHE_GRAPH
+       } from './env-config';
+import { chain } from 'lodash';
+import { serializeTriple } from './utils';
 
 const SHARE_FOLDER = '/share';
 
@@ -33,10 +45,19 @@ export default class DeltaCache {
       try {
         const filename = `delta-${new Date().toISOString()}.json`;
         const filepath = `/${SHARE_FOLDER}/${RELATIVE_FILE_PATH}/${filename}`;
-        await fs.writeFile(filepath, JSON.stringify( cachedArray ));
-        console.log(`Delta cache has been written to file. Cache contained ${cachedArray.length} items.`);
-        await this.writeFileToStore(filename, filepath);
-        console.log("File is persisted in store and can be consumed now.");
+
+        if(!(await this.isAllowedToWriteCache())){
+          console.log(`Found ${HEALING_TASK_DIFFFING_OPERATION} is busy for ${HEALING_JOB_OPERATION}.`);
+          console.log(`This caching operation will be skipped and taken care of by the healing process`);
+          return;
+        }
+        else {
+          await this.updateCacheGraph(cachedArray);
+          await fs.writeFile(filepath, JSON.stringify( cachedArray ));
+          console.log(`Delta cache has been written to file. Cache contained ${cachedArray.length} items.`);
+          await this.writeFileToStore(filename, filepath);
+          console.log("File is persisted in store and can be consumed now.");
+        }
       } catch (e) {
         console.log(e);
       }
@@ -86,7 +107,73 @@ export default class DeltaCache {
 
   /**
    * @private
-  */
+   */
+  async updateCacheGraph(cachedArray){
+    const deleteChunks =
+          chain(cachedArray)
+          .map(c => c.deletes)
+          .flatten()
+          .map(t => serializeTriple(t))
+          .chunk(20)
+          .value();
+
+    for(const deleteChunk of deleteChunks){
+      const deleteQuery = `
+        ${PREFIXES}
+        DELETE DATA {
+          GRAPH ${sparqlEscapeUri(CACHE_GRAPH)}{
+              ${deleteChunk.join('\n')}
+           }
+        }
+      `;
+      await update(deleteQuery);
+    }
+
+    const insertChunks =
+          chain(cachedArray)
+          .map(c => c.inserts)
+          .flatten()
+          .map(t => serializeTriple(t))
+          .chunk(20)
+          .value();
+
+    for(const insertChunk of insertChunks){
+      const insertQuery = `
+        ${PREFIXES}
+        INSERT DATA {
+          GRAPH ${sparqlEscapeUri(CACHE_GRAPH)}{
+              ${insertChunk.join('\n')}
+           }
+        }
+      `;
+      await update(insertQuery);
+    }
+  }
+
+  async isAllowedToWriteCache(){
+    const queryDiffingTask = `
+      ${PREFIXES}
+      SELECT DISTINCT ?task WHERE {
+        GRAPH ?g {
+          ?task a ${sparqlEscapeUri(TASK_TYPE)};
+                adms:status ?status;
+                task:operation ${sparqlEscapeUri(HEALING_TASK_DIFFFING_OPERATION)};
+                dct:isPartOf ?job.
+          ?job a ${sparqlEscapeUri(JOB_TYPE)};
+               task:operation ${sparqlEscapeUri(HEALING_JOB_OPERATION)}.
+        }
+        FILTER(?status NOT IN (
+         ${sparqlEscapeUri(STATUS_FAILED)},
+         ${sparqlEscapeUri(STATUS_SUCCESS)}
+        ))
+      }
+    `;
+
+    const result = await query(queryDiffingTask);
+
+    return !result.results.length;
+  }
+
   async writeFileToStore(filename, filepath) {
     const virtualFileUuid = uuid();
     const virtualFileUri = `http://data.lblod.info/files/${virtualFileUuid}`;
