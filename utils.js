@@ -1,3 +1,5 @@
+import { sparqlEscapeString, sparqlEscapeUri } from 'mu';
+
 function isInverse(predicate) {
   return predicate && predicate.startsWith('^');
 }
@@ -11,9 +13,22 @@ function normalizePredicate(predicate) {
 }
 
 function serializeTriple(triple) {
-  const predicate = isInverse(triple.predicate.value) ? `<${triple.predicate.value.slice(1)}>` : `<${triple.predicate.value}>`;
-  const object = triple.object.type == 'uri' ? `<${triple.object.value}>` : `"${triple.object.value}"`;
-  return `<${triple.subject.value}> ${predicate} ${object}`;
+  const predicate = sparqlEscapePredicate(triple.predicate.value);
+  return `${serializeTriplePart(triple.subject)} ${predicate} ${serializeTriplePart(triple.object)}.`;
+}
+
+function serializeTriplePart(triplePart){
+  if(triplePart.type == 'uri'){
+    return sparqlEscapeUri(triplePart.value);
+  }
+  else {
+    if(triplePart.datatype){
+      return `${sparqlEscapeString(triplePart.value)}^^${sparqlEscapeUri(triplePart.datatype)}`;
+    }
+    else {
+      return sparqlEscapeString(triplePart.value);
+    }
+  }
 }
 
 /**
