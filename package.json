@@ -5,8 +5,7 @@
   "dependencies": {
     "@lblod/mu-auth-sudo": "^0.2.0",
     "fs-extra": "^8.0.1",
-    "lodash.flatten": "^4.4.0",
-    "lodash.uniq": "^4.5.0"
+    "lodash": "^4.17.11"
   },
   "devDependencies": {},
   "scripts": {
